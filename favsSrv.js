@@ -3,7 +3,7 @@ var Q = require('q');
 module.exports = {
     getFavs: function () {
         var client = new TwitterClient();
-        return client.getFavs(3);
+        return client.getFavs(0);
     }
 };
 var TwitterClient = (function () {
@@ -15,9 +15,21 @@ var TwitterClient = (function () {
             access_token_secret: 'zs96CJOgM5L1ZLAL95hvwqCegiom9CCu3hsaXdIyee9Fh'
         });
     }
+    TwitterClient.prototype.buildUrl = function (count) {
+        var result = '';
+        if (count > 0) {
+            result = 'favorites/list.json?count=' + count;
+        }
+        else {
+            result = 'favorites/list.json';
+        }
+        return result;
+    };
     TwitterClient.prototype.getFavs = function (count) {
         var deferred = Q.defer();
-        this.client.get('favorites/list.json?count=' + count, function (error, tweets, response) {
+        var url = this.buildUrl(count);
+        console.log('get: ' + count);
+        this.client.get(url, function (error, tweets, response) {
             if (error) {
                 deferred.reject(error);
             }
