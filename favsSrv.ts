@@ -2,9 +2,14 @@ var Twitter = require('Twitter');
 var Q = require('q');
 
 module.exports = {
-    getFavs: function() {
+    // returns a promise with the favorites
+    getFavs: function(count: number, max_id: number) {
       var client = new TwitterClient();
-      return client.getFavs(0);
+      return client.getFavs(count, max_id);
+    },
+    getStatus: function(count: number) {
+      var client = new TwitterClient();
+      return client.getStatus();
     }
 }
 
@@ -19,26 +24,49 @@ class TwitterClient {
     });
   }
 
-  buildUrl(count: number) {
-    var result = '';
+  buildUrl(count: number, max_id: number) {
+    console.log('building url with max_id: ' + max_id);
+    var result = 'favorites/list.json';
+    if(count > 0 || max_id > 0) {
+      result = result + '?';
+    }
     if (count > 0) {
-      result = 'favorites/list.json?count=' + count;
-    } else {
-      result = 'favorites/list.json';
+      result = result + 'count=' + count;
+    }
+    if(max_id > 0) {
+      console.log('adding max_id paramteter ');
+      if (count > 0) {
+        result = result + '&';
+      }
+      result = result + 'max_id=' + max_id;
     }
     return result;
   }
 
-  getFavs(count: number) {
+  getFavs(count: number, max_id: number) {
     var deferred = Q.defer();
-    var url = this.buildUrl(count);
-    console.log('get: ' + count);
-    this.client.get(url, function(error, tweets, response){
+    var url = this.buildUrl(count, max_id);
+    console.log('get from: ' + url);
+    this.client.get(url, (error, tweets, response) => {
       if(error) {
         deferred.reject(error);
       }
       else {
         deferred.resolve(tweets);
+      }
+    });
+    return deferred.promise;
+  }
+
+  getStatus() {
+    var deferred = Q.defer();
+    var url = 'application/rate_limit_status.json?resources=help,favorites,statuses';
+    this.client.get(url, (error, status, response) => {
+      if(error) {
+        deferred.reject(error);
+      }
+      else {
+        deferred.resolve(status);
       }
     });
     return deferred.promise;

@@ -1,9 +1,13 @@
 var Twitter = require('Twitter');
 var Q = require('q');
 module.exports = {
-    getFavs: function () {
+    getFavs: function (count, max_id) {
         var client = new TwitterClient();
-        return client.getFavs(0);
+        return client.getFavs(count, max_id);
+    },
+    getStatus: function (count) {
+        var client = new TwitterClient();
+        return client.getStatus();
     }
 };
 var TwitterClient = (function () {
@@ -15,26 +19,47 @@ var TwitterClient = (function () {
             access_token_secret: 'zs96CJOgM5L1ZLAL95hvwqCegiom9CCu3hsaXdIyee9Fh'
         });
     }
-    TwitterClient.prototype.buildUrl = function (count) {
-        var result = '';
-        if (count > 0) {
-            result = 'favorites/list.json?count=' + count;
+    TwitterClient.prototype.buildUrl = function (count, max_id) {
+        console.log('building url with max_id: ' + max_id);
+        var result = 'favorites/list.json';
+        if (count > 0 || max_id > 0) {
+            result = result + '?';
         }
-        else {
-            result = 'favorites/list.json';
+        if (count > 0) {
+            result = result + 'count=' + count;
+        }
+        if (max_id > 0) {
+            console.log('adding max_id paramteter ');
+            if (count > 0) {
+                result = result + '&';
+            }
+            result = result + 'max_id=' + max_id;
         }
         return result;
     };
-    TwitterClient.prototype.getFavs = function (count) {
+    TwitterClient.prototype.getFavs = function (count, max_id) {
         var deferred = Q.defer();
-        var url = this.buildUrl(count);
-        console.log('get: ' + count);
+        var url = this.buildUrl(count, max_id);
+        console.log('get from: ' + url);
         this.client.get(url, function (error, tweets, response) {
             if (error) {
                 deferred.reject(error);
             }
             else {
                 deferred.resolve(tweets);
+            }
+        });
+        return deferred.promise;
+    };
+    TwitterClient.prototype.getStatus = function () {
+        var deferred = Q.defer();
+        var url = 'application/rate_limit_status.json?resources=help,favorites,statuses';
+        this.client.get(url, function (error, status, response) {
+            if (error) {
+                deferred.reject(error);
+            }
+            else {
+                deferred.resolve(status);
             }
         });
         return deferred.promise;

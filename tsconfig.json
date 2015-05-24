@@ -13,7 +13,9 @@
         "!./node_modules/**/*.ts"
     ],
     "files": [
+        "./backup.ts",
         "./favsSrv.ts",
+        "./mongoTwitter.ts",
         "./server.ts"
     ]
 }
