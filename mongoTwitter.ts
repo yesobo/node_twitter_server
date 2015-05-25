@@ -1,5 +1,6 @@
 var mongodb = require('mongodb');
 var Q = require('q');
+var util = require('util');
 
 class MongoTwitter {
   private user: string;
@@ -42,6 +43,42 @@ class MongoTwitter {
     return deferred.promise;
   }
 
+  getLastFav() {
+    var deferred = Q.defer();
+    var that = this;
+    mongodb.MongoClient.connect(this.uri, function(err, db) {
+      if(err) {
+        console.log('error on mongodb connection');
+        deferred.reject(err);
+      }
+      that.db = db;
+      var twitterites = db.collection('twitteries');
+      twitterites.findOne({}, { "sort": [['id',-1]] }, (err, document) => {
+        console.log("Found #" + document.id);
+        deferred.resolve(document);
+      });
+    })
+    return deferred.promise;
+  }
+
+  getNewFavs(lastId: number) {
+    var deferred = Q.defer();
+    var that = this;
+    mongodb.MongoClient.connect(this.uri, function(err, db) {
+      if(err) {
+        console.log('error on mongodb connection');
+        deferred.reject(err);
+      }
+      that.db = db;
+      var twitterites = db.collection('twitteries');
+      twitterites.find({"id": { $gt: lastId } }, { "sort": [['id',-1]] }).toArray(function(err, results) {
+        console.log('found ' + results.length + ' new twitterites.');
+        deferred.resolve(results);
+      });
+    })
+    return deferred.promise;
+  }
+
   disconnect() {
     console.log('disconnecting ...' + this.db);
     if(this.db) {
@@ -55,35 +92,3 @@ class MongoTwitter {
 }
 
 module.exports = MongoTwitter;
-
-    /*
-    if(err) throw err;
-
-    twitteries.update(
-      { song: 'One Sweet Day' },
-      { $set: { artist: 'Mariah Carey ft. Boyz II Men' } },
-
-      function (err, result) {
-        if(err) throw err;
-        twitteries.find({ weeksAtOne : { $gte: 10 } }).sort({ decade: 1 }).toArray(function (err, docs) {
-          if(err) throw err;
-          docs.forEach(function (doc) {
-            console.log(
-              'In the ' + doc['decade'] + ', ' + doc['song'] + ' by ' + doc['artist'] +
-              ' topped the charts for ' + doc['weeksAtOne'] + ' straight weeks.'
-            );
-          });
-
-          // Since this is an example, we'll clean up after ourselves.
-          twitteries.drop(function (err) {
-            if(err) throw err;
-
-            // Only close the connection when your app is terminating.
-            db.close(function (err) {
-              if(err) throw err;
-            });
-          });
-        });
-      }
-    );
-    */

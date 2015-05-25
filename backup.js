@@ -36,9 +36,22 @@ function getFavsWithRetries(favs_left, max_id) {
         });
     }
 }
+function getNewFavs() {
+    var mongoTwitter = new MongoTwitterClass();
+    mongoTwitter.getLastFav().then(function (lastFav) {
+        console.log('last fav is: ' + lastFav.id);
+        mongoTwitter.getNewFavs(lastFav.id).then(function (newFavs) {
+            if (newFavs.length > 0) {
+                console.log('new favs detected!');
+            }
+            else {
+                console.log('No new favs detected.');
+            }
+        });
+    });
+}
 function main() {
     var favs_left = 1580;
     var max_id = 0;
-    getFavsWithRetries(0, 0);
 }
 main();

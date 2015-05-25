@@ -1,5 +1,6 @@
 var mongodb = require('mongodb');
 var Q = require('q');
+var util = require('util');
 var MongoTwitter = (function () {
     function MongoTwitter() {
         console.log('building mongodb instance');
@@ -31,6 +32,40 @@ var MongoTwitter = (function () {
                 deferred.resolve(err);
             }
             deferred.resolve(result);
+        });
+        return deferred.promise;
+    };
+    MongoTwitter.prototype.getLastFav = function () {
+        var deferred = Q.defer();
+        var that = this;
+        mongodb.MongoClient.connect(this.uri, function (err, db) {
+            if (err) {
+                console.log('error on mongodb connection');
+                deferred.reject(err);
+            }
+            that.db = db;
+            var twitterites = db.collection('twitteries');
+            twitterites.findOne({}, { "sort": [['id', -1]] }, function (err, document) {
+                console.log("Found #" + document.id);
+                deferred.resolve(document);
+            });
+        });
+        return deferred.promise;
+    };
+    MongoTwitter.prototype.getNewFavs = function (lastId) {
+        var deferred = Q.defer();
+        var that = this;
+        mongodb.MongoClient.connect(this.uri, function (err, db) {
+            if (err) {
+                console.log('error on mongodb connection');
+                deferred.reject(err);
+            }
+            that.db = db;
+            var twitterites = db.collection('twitteries');
+            twitterites.find({ "id": { $gt: lastId } }, { "sort": [['id', -1]] }).toArray(function (err, results) {
+                console.log('found ' + results.length + ' new twitterites.');
+                deferred.resolve(results);
+            });
         });
         return deferred.promise;
     };
