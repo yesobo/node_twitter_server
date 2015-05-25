@@ -37,18 +37,15 @@ function getFavsWithRetries(favs_left, max_id) {
     }
 }
 function getNewFavs() {
+    var deferred = Q.defer();
     var mongoTwitter = new MongoTwitterClass();
     mongoTwitter.getLastFav().then(function (lastFav) {
         console.log('last fav is: ' + lastFav.id);
         mongoTwitter.getNewFavs(lastFav.id).then(function (newFavs) {
-            if (newFavs.length > 0) {
-                console.log('new favs detected!');
-            }
-            else {
-                console.log('No new favs detected.');
-            }
+            deferred.resolve(newFavs);
         });
     });
+    return deferred.promise;
 }
 function main() {
     var favs_left = 1580;

@@ -1,4 +1,5 @@
 var Twitter = require('Twitter');
+var MongoTwitterClass = require('./mongoTwitter');
 var Q = require('q');
 module.exports = {
     getFavs: function (count, max_id) {
@@ -8,6 +9,10 @@ module.exports = {
     getStatus: function (count) {
         var client = new TwitterClient();
         return client.getStatus();
+    },
+    getAllFavs: function (count) {
+        var client = new TwitterClient();
+        return client.getAllFavs();
     }
 };
 var TwitterClient = (function () {
@@ -48,6 +53,14 @@ var TwitterClient = (function () {
             else {
                 deferred.resolve(tweets);
             }
+        });
+        return deferred.promise;
+    };
+    TwitterClient.prototype.getAllFavs = function () {
+        var deferred = Q.defer();
+        var mongoTwitter = new MongoTwitterClass();
+        mongoTwitter.getAllFavs().then(function (allFavs) {
+            deferred.resolve(allFavs);
         });
         return deferred.promise;
     };

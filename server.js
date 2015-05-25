@@ -8,7 +8,7 @@ app.all('*', function (req, res, next) {
     next();
 });
 app.get('/', function (req, res) {
-    FavsService.getFavs().then(function (data) {
+    FavsService.getAllFavs().then(function (data) {
         res.send(data);
     });
 });

@@ -11,7 +11,7 @@ app.all('*', function(req, res, next) {
 });
 
 app.get('/', (req, res) => {
-  FavsService.getFavs().then( data => {
+  FavsService.getAllFavs().then( data => {
     res.send(data);
   });
 });

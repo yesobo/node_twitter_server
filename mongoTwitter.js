@@ -69,6 +69,23 @@ var MongoTwitter = (function () {
         });
         return deferred.promise;
     };
+    MongoTwitter.prototype.getAllFavs = function () {
+        var deferred = Q.defer();
+        var that = this;
+        mongodb.MongoClient.connect(this.uri, function (err, db) {
+            if (err) {
+                console.log('error on mongodb connection');
+                deferred.reject(err);
+            }
+            that.db = db;
+            var twitterites = db.collection('twitteries');
+            twitterites.find({}, { "sort": [['id', -1]] }).toArray(function (err, results) {
+                console.log('found ' + results.length + ' twitterites.');
+                deferred.resolve(results);
+            });
+        });
+        return deferred.promise;
+    };
     MongoTwitter.prototype.disconnect = function () {
         console.log('disconnecting ...' + this.db);
         if (this.db) {
