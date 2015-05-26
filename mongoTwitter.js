@@ -69,7 +69,7 @@ var MongoTwitter = (function () {
         });
         return deferred.promise;
     };
-    MongoTwitter.prototype.getAllFavs = function () {
+    MongoTwitter.prototype.getAllFavs_old = function () {
         var deferred = Q.defer();
         var that = this;
         mongodb.MongoClient.connect(this.uri, function (err, db) {
@@ -85,6 +85,27 @@ var MongoTwitter = (function () {
             });
         });
         return deferred.promise;
+    };
+    MongoTwitter.prototype.connect = function () {
+        console.log('connect: INI');
+        return Q.nfcall(mongodb.MongoClient.connect, this.uri);
+    };
+    MongoTwitter.prototype.getTwitterites = function (db) {
+        return Q.Promise(function (resolve, reject, notify) {
+            var twitterites = db.collection('twitteries');
+            twitterites.find({}, { "sort": [['id', -1]] }).toArray(function (err, results) {
+                if (err) {
+                    reject(err);
+                }
+                console.log('found ' + results.length + ' twitterites.');
+                resolve(results);
+            });
+        });
+    };
+    MongoTwitter.prototype.getAllFavs = function () {
+        console.log('getAllFavs: INI');
+        return this.connect()
+            .then(this.getTwitterites);
     };
     MongoTwitter.prototype.disconnect = function () {
         console.log('disconnecting ...' + this.db);

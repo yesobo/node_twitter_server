@@ -79,7 +79,7 @@ class MongoTwitter {
     return deferred.promise;
   }
 
-  getAllFavs() {
+  getAllFavs_old() {
     var deferred = Q.defer();
     var that = this;
     mongodb.MongoClient.connect(this.uri, function(err, db) {
@@ -95,6 +95,30 @@ class MongoTwitter {
       });
     })
     return deferred.promise;
+  }
+
+  connect() {
+    console.log('connect: INI');
+    return Q.nfcall(mongodb.MongoClient.connect, this.uri);
+  }
+
+  getTwitterites(db) {
+    return Q.Promise( function(resolve, reject, notify) {
+      var twitterites = db.collection('twitteries');
+      twitterites.find({}, { "sort": [['id',-1]] }).toArray(function(err, results) {
+        if(err) {
+          reject(err);
+        }
+        console.log('found ' + results.length + ' twitterites.');
+        resolve(results);
+      })
+    })
+  }
+
+  getAllFavs() {
+    console.log('getAllFavs: INI');
+    return this.connect()
+    .then(this.getTwitterites);
   }
 
   disconnect() {

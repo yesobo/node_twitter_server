@@ -57,12 +57,8 @@ var TwitterClient = (function () {
         return deferred.promise;
     };
     TwitterClient.prototype.getAllFavs = function () {
-        var deferred = Q.defer();
         var mongoTwitter = new MongoTwitterClass();
-        mongoTwitter.getAllFavs().then(function (allFavs) {
-            deferred.resolve(allFavs);
-        });
-        return deferred.promise;
+        return mongoTwitter.getAllFavs();
     };
     TwitterClient.prototype.getStatus = function () {
         var deferred = Q.defer();

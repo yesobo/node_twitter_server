@@ -64,12 +64,8 @@ class TwitterClient {
   }
 
   getAllFavs() {
-    var deferred = Q.defer();
     var mongoTwitter = new MongoTwitterClass();
-    mongoTwitter.getAllFavs().then((allFavs) => {
-      deferred.resolve(allFavs);
-    });
-    return deferred.promise;
+    return mongoTwitter.getAllFavs();
   }
 
   getStatus() {
