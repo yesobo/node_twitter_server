@@ -14,8 +14,13 @@
     ],
     "files": [
         "./backup.ts",
-        "./favsSrv.ts",
         "./mongoTwitter.ts",
-        "./server.ts"
+        "./server.ts",
+        "./test/twitterSrv.ts",
+        "./twitterSrv.ts",
+        "./typings/mocha/mocha.d.ts",
+        "./typings/node/node.d.ts",
+        "./typings/sinon/sinon.d.ts",
+        "./typings/tsd.d.ts"
     ]
 }

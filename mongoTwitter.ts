@@ -7,8 +7,8 @@ class MongoTwitter {
   private password: string;
   private uri: string;
   private db;
+
   constructor() {
-    console.log('building mongodb instance');
     this.user = 'yesobo';
     this.password = 'arnas747';
     this.uri = 'mongodb://' + this.user + ':' + this.password + '@ds031862.mongolab.com:31862/twitterites';
@@ -79,46 +79,17 @@ class MongoTwitter {
     return deferred.promise;
   }
 
-  getAllFavs_old() {
-    var deferred = Q.defer();
-    var that = this;
-    mongodb.MongoClient.connect(this.uri, function(err, db) {
-      if(err) {
-        console.log('error on mongodb connection');
-        deferred.reject(err);
-      }
-      that.db = db;
-      var twitterites = db.collection('twitteries');
-      twitterites.find({}, { "sort": [['id',-1]] }).toArray(function(err, results) {
-        console.log('found ' + results.length + ' twitterites.');
-        deferred.resolve(results);
-      });
-    })
-    return deferred.promise;
-  }
-
-  connect() {
-    console.log('connect: INI');
-    return Q.nfcall(mongodb.MongoClient.connect, this.uri);
-  }
-
   getTwitterites(db) {
     return Q.Promise( function(resolve, reject, notify) {
       var twitterites = db.collection('twitteries');
       twitterites.find({}, { "sort": [['id',-1]] }).toArray(function(err, results) {
+        console.log('result returned');
         if(err) {
           reject(err);
         }
-        console.log('found ' + results.length + ' twitterites.');
         resolve(results);
       })
     })
-  }
-
-  getAllFavs() {
-    console.log('getAllFavs: INI');
-    return this.connect()
-    .then(this.getTwitterites);
   }
 
   disconnect() {
@@ -131,6 +102,17 @@ class MongoTwitter {
     }
   }
 
+  // private
+  connect() {
+    console.log('connect: INI');
+    return Q.nfcall(mongodb.MongoClient.connect, this.uri);
+  }
+
+  // public
+  getAllFavs() {
+    return this.connect()
+    .then(this.getTwitterites);
+  }
 }
 
 module.exports = MongoTwitter;
